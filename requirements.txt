@@ -1,0 +1,22 @@
+ccxt>=4.1.0
+pandas>=2.0.0
+numpy>=1.24.0
+ta>=0.11.0
+tradingview-screener
+prophet
+yfinance
+matplotlib
+python-dotenv
+plotly
+openai
+hyperliquid-python-sdk
+eth-account
+toonify
+psycopg2-binary
+
+
+
+### CONSIGLIATA INSTALLAZIONE IN VENV
+# python -m venv venv
+# .\venv\Scripts\activate   (Windows)
+# pip install -r requirements.txt
