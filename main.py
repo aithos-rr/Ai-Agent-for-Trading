@@ -30,7 +30,7 @@ try:
     )
 
     # Calcolo delle informazioni in input per Ticker
-    tickers = ["BTC", "ETH", "BNB", "SOL", "DOGE"]
+    tickers = ["BTC", "ETH", "BNB", "SOL", "XRP", "DOGE"]
     indicators_txt, indicators_json  = analyze_multiple_tickers(tickers)
     news_txt = fetch_latest_news()
     # whale_alerts_txt = format_whale_alerts_to_string()

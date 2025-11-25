@@ -11,7 +11,7 @@ Analyze the market and portfolio, then respond with ONLY a JSON object in this e
 
 {{
   "operation": "open" | "close" | "hold",
-  "symbol": "BTC" | "ETH" | "BNB" | "SOL" | "DOGE",
+  "symbol": "BTC" | "ETH" | "BNB" | "SOL" | "XRP" | "DOGE",
   "direction": "long" | "short" | null,
   "target_portion_of_balance": 0.0–1.0,
   "leverage": 1–40,

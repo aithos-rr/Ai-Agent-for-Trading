@@ -37,7 +37,8 @@ def previsione_trading_agent(prompt):
                 "BTC", 
                 "ETH", 
                 "BNB", 
-                "SOL",
+                "SOL", 
+                "XRP", 
                 "DOGE"
                 ]
             },
