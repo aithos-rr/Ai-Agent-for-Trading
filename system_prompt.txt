@@ -9,14 +9,14 @@ Portfolio Data:
 
 Analyze the market and portfolio, then respond with ONLY a JSON object in this exact format:
 
-{
+{{
   "operation": "open" | "close" | "hold",
   "symbol": "BTC" | "ETH" | "BNB" | "SOL" | "DOGE",
   "direction": "long" | "short" | null,
   "target_portion_of_balance": 0.0–1.0,
   "leverage": 1–40,
   "reason": "Brief explanation of your decision"
-}
+}}
 
 Rules:
 - Only ONE position per coin allowed.
