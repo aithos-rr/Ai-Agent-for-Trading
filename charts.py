@@ -21,7 +21,7 @@ class ForecastChart:
         """
         Crea un grafico interattivo per un singolo coin.
 
-        :param coin: es. "BTC", "ETH", "BNB", "SOL", "XRP", "DOGE"
+        :param coin: es. "BTC", "ETH", "BNB", "SOL", "DOGE"
         :param interval: "15m" o "1h"
         :param n_future: numero di punti futuri da predire (default 4)
         """

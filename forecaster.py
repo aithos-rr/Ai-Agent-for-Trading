@@ -110,14 +110,14 @@ class HyperliquidForecaster:
         return df.to_string(index=False)
 
 # Funzione helper per mantenere compatibilità con il vecchio script
-def get_hyperliquid_forecasts(tickers=["BTC", "ETH", "BNB", "SOL", "XRP", "DOGE"], testnet=True):
+def get_hyperliquid_forecasts(tickers=["BTC", "ETH", "BNB", "SOL", "DOGE"], testnet=True):
     forecaster = HyperliquidForecaster(testnet=testnet)
     return forecaster.get_crypto_forecasts(tickers)
 
-def get_crypto_forecasts(tickers=["BTC", "ETH", "BNB", "SOL", "XRP", "DOGE"], testnet=True):
+def get_crypto_forecasts(tickers=["BTC", "ETH", "BNB", "SOL", "DOGE"], testnet=True):
     try:
         forecaster = HyperliquidForecaster(testnet=True)
-        results = forecaster.forecast_many(["BTC", "ETH", "BNB", "SOL", "XRP", "DOGE"])
+        results = forecaster.forecast_many(["BTC", "ETH", "BNB", "SOL", "DOGE"])
         
         # Stampa il riepilogo come DataFrame
         df = pd.DataFrame(results)
