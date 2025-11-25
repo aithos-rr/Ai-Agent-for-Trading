@@ -43,17 +43,18 @@ def get_db_config() -> DBConfig:
 
 @contextmanager
 def get_connection():
-    """Context manager che restituisce una connessione PostgreSQL.
+    """Return a PostgreSQL connection using Railway DATABASE_URL."""
+    import os
+    dsn = os.getenv("DATABASE_URL")
+    if not dsn:
+        raise ValueError("DATABASE_URL not found in environment variables")
 
-    Usa il DSN in DATABASE_URL.
-    """
-
-    config = get_db_config()
-    conn = psycopg2.connect(config.dsn)
+    conn = psycopg2.connect(dsn)
     try:
         yield conn
     finally:
         conn.close()
+
 
 
 # =====================
