@@ -12,6 +12,19 @@ import db_utils
 from dotenv import load_dotenv
 load_dotenv()
 
+
+# ============ SAFE DEFAULTS PER EVITARE NameError DURANTE ERROR LOGGING ============
+system_prompt = None
+indicators_json = None
+news_txt = None
+sentiment_json = None
+forecasts_json = None
+account_status = None
+tickers = ["BTC", "ETH", "BNB", "SOL", "DOGE"]  # necessario anche per except
+
+
+
+
 FEE_RATE = 0.0005  # 0.05% di taker fee simulata (esempio, adatta se vuoi)
 
 # Collegamento ad Hyperliquid
@@ -22,6 +35,18 @@ WALLET_ADDRESS = os.getenv("WALLET_ADDRESS")
 
 if not PRIVATE_KEY or not WALLET_ADDRESS:
     raise RuntimeError("PRIVATE_KEY o WALLET_ADDRESS mancanti nel .env")
+# ==========================================
+# LETTURA EARLY DEL SYSTEM PROMPT (blocca crash)
+# ==========================================
+try:
+    with open('system_prompt.txt', 'r') as f:
+        system_prompt = f.read()
+except Exception as e_prompt:
+    print(f"[ERROR] Impossibile leggere system_prompt.txt: {e_prompt}")
+    system_prompt = None
+# ==========================================
+# CREAZIONE DEL BOT HYPERLIQUID
+# ==========================================
 try:
     bot = HyperLiquidTrader(
         secret_key=PRIVATE_KEY,
@@ -48,10 +73,6 @@ try:
     snapshot_id = db_utils.log_account_status(account_status)
     print(f"[db_utils] Operazione inserita con id={snapshot_id}")
 
-
-    # Creating System prompt
-    with open('system_prompt.txt', 'r') as f:
-        system_prompt = f.read()
 
     # Sostituisci SOLO i primi due {}: prima il portfolio, poi il contesto
     system_prompt = system_prompt.replace("{}", portfolio_data, 1)
@@ -170,29 +191,30 @@ try:
     except Exception as e_fee:
         print(f"[costs_logger] Errore nel logging fee/tasse: {e_fee}")
 
-
-    except Exception as e:
-        db_utils.log_error(
-            e,
-            context={
-                "prompt": system_prompt,
-                "tickers": tickers,
-                "indicators": indicators_json,
-                "news": news_txt,
-                "sentiment": sentiment_json,
-                "forecasts": forecasts_json,
-                "balance": account_status,
-            },
-            source="trading_agent",
-        )
-        print(f"An error occurred: {e}")
-
-
-
 except Exception as e:
-    db_utils.log_error(e, context={"prompt": system_prompt, "tickers": tickers,
-                                    "indicators":indicators_json, "news":news_txt,
-                                    "sentiment":sentiment_json, "forecasts":forecasts_json,
-                                    "balance":account_status
-                                    }, source="trading_agent")
-    print(f"An error occurred: {e}")
+    print("\n[!!] ERRORE FATALE NEL MAIN\n")
+
+    # Costruisco un contesto sicuro per evitare NameError
+    safe_context = {
+        "prompt": system_prompt,
+        "tickers": tickers,
+        "indicators": indicators_json,
+        "news": news_txt,
+        "sentiment": sentiment_json,
+        "forecasts": forecasts_json,
+        "balance": account_status
+    }
+
+    # Avviso l'utente se qualche dato non è disponibile
+    for key, val in safe_context.items():
+        if val is None:
+            print(f"[WARN] Valore NON disponibile per: {key}")
+
+    # Log dell'errore nel DB
+    db_utils.log_error(
+        e,
+        context=safe_context,
+        source="trading_agent"
+    )
+
+    print(f"[FATAL] {e}")
