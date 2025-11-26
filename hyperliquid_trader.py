@@ -30,8 +30,26 @@ class HyperLiquidTrader:
         self.info = Info(base_url, skip_ws=skip_ws)
         self.exchange = Exchange(account, base_url, account_address=account_address)
 
-        # cache meta per tick-size e min-size
-        self.meta = self.info.meta()
+        # Lazy loading della meta (non chiamare API nel costruttore!)
+        self._meta_cache = None
+
+    def get_meta(self):
+        """
+        Lazy loading sicuro della meta di Hyperliquid.
+        Evita chiamate API nel costruttore (critiche su Railway).
+        Ritorna None se la testnet è instabile.
+        """
+        if self._meta_cache is not None:
+            return self._meta_cache
+
+        try:
+            self._meta_cache = self.info.meta()
+            return self._meta_cache
+        except Exception as e:
+            print(f"[HyperLiquid] Errore meta(): {e}")
+            return None
+   
+
 
     def _to_hl_size(self, size_decimal: Decimal) -> str:
         # HL accetta max 8 decimali
@@ -74,10 +92,16 @@ class HyperLiquidTrader:
         Hyperliquid definisce per ogni asset un tick size.
         Lo leggiamo da meta().
         """
-        for perp in self.meta["universe"]:
+        meta = self.get_meta()
+        if not meta:
+            print("[WARN] Meta non disponibile — uso tick di fallback.")
+            return Decimal("0.00000001")
+
+        for perp in meta["universe"]:
             if perp["name"] == symbol:
                 return Decimal(str(perp["szDecimals"]))
-        return Decimal("0.00000001")  # fallback a 1e-8
+        return Decimal("0.00000001")
+
 
     def _round_size(self, size: Decimal, decimals: int) -> float:
         """
@@ -231,10 +255,16 @@ class HyperLiquidTrader:
 
         # 3b) Applica i constraint di minimum size come fai già
         symbol_info = None
-        for perp in self.meta["universe"]:
+        meta = self.get_meta()
+        if not meta:
+            print("[WARN] Meta non disponibile — impossibile aprire posizione.")
+            return {"status": "error", "reason": "meta_unavailable"}
+
+        for perp in meta["universe"]:
             if perp["name"] == symbol:
                 symbol_info = perp
                 break
+
 
         if not symbol_info:
             raise RuntimeError(f"Symbol {symbol} non trovato nella meta universe")
@@ -493,9 +523,15 @@ class HyperLiquidTrader:
         print("\n📊 LIMITI TRADING HYPERLIQUID")
         print("-" * 60)
         
-        for perp in self.meta["universe"]:
+        meta = self.get_meta()
+        if not meta:
+            print("[WARN] Meta non disponibile — abort debug_symbol_limits.")
+            return
+
+        for perp in meta["universe"]:
             if symbol and perp["name"] != symbol:
                 continue
+
                 
             print(f"\nSymbol: {perp['name']}")
             print(f"  Min Size: {perp.get('minSz', 'N/A')}")
